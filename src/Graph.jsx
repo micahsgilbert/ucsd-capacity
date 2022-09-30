@@ -22,13 +22,14 @@ function Graph(props) {
       endUTC = (endTime.getTime())/1000
     } else if (timeframe == "yesterday") {
       startTime.setHours(6, 0, 0) 
-      endTime.setHours(6, 0, 0)
+      endTime.setHours(23,59,59)
       // 86400 seconds in a day
       startUTC = (startTime.getTime())/1000 - 86400
       endUTC = (endTime.getTime())/1000 - 86400
     } else if (timeframe == "week") {
       startTime.setHours(6, 0, 0)
       endTime.setHours(23,59,59)
+      // 604800 seconds in  a week
       startUTC = (startTime.getTime())/1000 - 604800
       endUTC = (endTime.getTime())/1000
     } else {
@@ -51,7 +52,7 @@ function Graph(props) {
   const parseData = () => {
     let parsedData
     if (timeframe == "week") {
-      // for all time data only return every 10 minutes
+      // for week, return every 10 minutes data to keep performance up
       parsedData = [{
         label: props.location,
         data: rawData.map(item => ({time: new Date(item.time * 1000 - tzOffset), busyness: item.busyness})).filter((val, idx) => (idx % 10 == 0))
