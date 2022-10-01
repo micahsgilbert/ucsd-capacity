@@ -41,7 +41,7 @@ function Graph(props) {
   }
 
   const processDBsnapshot = snapshot => {
-    console.log(snapshot)
+    console.log("processing")
     if (snapshot.exists()) {
       const rawSnapshotData = Object.values(snapshot.val())
       setRawData(rawSnapshotData)
@@ -50,6 +50,7 @@ function Graph(props) {
   }
 
   const parseData = () => {
+    console.log("parseData called")
     let parsedData
     if (timeframe == "week") {
       // for week, return every 10 minutes data to keep performance up
@@ -76,11 +77,11 @@ function Graph(props) {
 
   useEffect(() => { getHistoricalData(props.location, timeframe)}, [timeframe, props.location])
 
-  return <div className="w-full h-48 mb-6 bg-slate-200 relative rounded-xl">
+  return <div className="w-full h-60 mb-6 bg-slate-200 relative rounded-xl">
     <div className={"absolute top-2 left-2"}>
-      <button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2"} onClick={() => {setTimeframe("today")}}>Today</button>
-      <button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2"} onClick={() => {setTimeframe("yesterday")}}>Yesterday</button>
-      <button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2"} onClick={() => {setTimeframe("week")}}>Past Week</button>
+      <button className={"h-6 text-slate-200 hover:bg-slate-700 rounded pl-2 pr-2 mr-2 " + (timeframe == "today" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("today")}}>Today</button>
+      <button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2 " + (timeframe == "yesterday" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("yesterday")}}>Yesterday</button>
+      {/*<button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2 " + (timeframe == "week" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("week")}}>Past Week</button>*/}
     </div>
     <button className={"w-6 h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded-xl absolute top-2 right-2"} onClick={props.onClose}>x</button>
     <h3 className={"text-center text-slate-900 text-3xl"}>{props.location}</h3>
