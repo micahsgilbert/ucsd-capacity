@@ -80,7 +80,7 @@ function Graph(props) {
   return <div className="w-full h-60 mb-6 bg-slate-200 relative rounded-xl">
     <div className={"absolute top-2 left-2"}>
       <button className={"h-6 text-slate-200 hover:bg-slate-700 rounded pl-2 pr-2 mr-2 " + (timeframe == "today" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("today")}}>Today</button>
-      <button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2 " + (timeframe == "yesterday" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("yesterday")}}>Yesterday</button>
+      <button className={"h-6 text-slate-200 hover:bg-slate-700 rounded pl-2 pr-2 mr-2 " + (timeframe == "yesterday" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("yesterday")}}>Yesterday</button>
       {/*<button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2 " + (timeframe == "week" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("week")}}>Past Week</button>*/}
     </div>
     <button className={"w-6 h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded-xl absolute top-2 right-2"} onClick={props.onClose}>x</button>
