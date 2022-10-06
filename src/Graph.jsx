@@ -5,9 +5,10 @@ import { getDatabase, get, ref, query, startAt, endAt, orderByChild, onValue} fr
 function Graph(props) {
   const tzOffset = 25200000
 
-  const getHistoricalData = (location, timeframe) => {
+  const getHistoricalData = timeframe => {
     setLoading(true)
     const db = getDatabase()
+
     let startTime = new Date()
     let endTime = new Date()
     let startUTC
@@ -26,62 +27,50 @@ function Graph(props) {
       // 86400 seconds in a day
       startUTC = (startTime.getTime())/1000 - 86400
       endUTC = (endTime.getTime())/1000 - 86400
-    } else if (timeframe == "week") {
-      startTime.setHours(6, 0, 0)
-      endTime.setHours(23,59,59)
-      // 604800 seconds in  a week
-      startUTC = (startTime.getTime())/1000 - 604800
-      endUTC = (endTime.getTime())/1000
     } else {
       return
     }
 
-    const dbQuery = query(ref(db, "/"+location), orderByChild("time"), startAt(startUTC), endAt(endUTC))
-    get(dbQuery).then(processDBsnapshot)
+    const dbQuery = query(ref(db, "/"+props.location), orderByChild("time"), startAt(startUTC), endAt(endUTC))
+    get(dbQuery).then(snapshot => {processDBsnapshot(snapshot, timeframe)})
   }
-
-  const processDBsnapshot = snapshot => {
-    console.log("processing")
+    
+  const processDBsnapshot = (snapshot, timeframe) => {
     if (snapshot.exists()) {
       const rawSnapshotData = Object.values(snapshot.val())
-      setRawData(rawSnapshotData)
+      if (timeframe == "today") {
+        setRawTodayData(rawSnapshotData)
+      } else {
+        setRawYesterdayData(rawSnapshotData)
+      }
       setLoading(false)
     }
   }
 
   const parseData = () => {
-    console.log("parseData called")
-    let parsedData
-    if (timeframe == "week") {
-      // for week, return every 10 minutes data to keep performance up
-      parsedData = [{
-        label: props.location,
-        data: rawData.map(item => ({time: new Date(item.time * 1000 - tzOffset), busyness: item.busyness})).filter((val, idx) => (idx % 10 == 0))
-      }]
-    } else {
-      parsedData =  [{
-        label: props.location,
-        data: rawData.map(item => ({time: new Date(item.time * 1000 - tzOffset), busyness: item.busyness})) 
-      }]
-    }
+    let parsedData =  [{
+        label: "Today",
+        data: rawTodayData.map(item => ({time: new Date(item.time * 1000 - tzOffset), busyness: item.busyness})) 
+    }, {
+        label: "Yesterday",
+        data: rawYesterdayData.map(item => ({time: new Date((item.time+86400) * 1000 - tzOffset), busyness: item.busyness}))
+    }]
     return parsedData
   }
 
-  const [rawData, setRawData] = useState([])
-  const [timeframe, setTimeframe] = useState("today")
+  const [rawTodayData, setRawTodayData] = useState([])
+  const [rawYesterdayData, setRawYesterdayData] = useState([])
   const [loading, setLoading] = useState(true)
 
   const primaryAxis = useMemo(() => ({getValue: datum => datum.time, scaleType: "time"}))
   const secondaryAxes = useMemo(() => ([{getValue: datum => datum.busyness}]))
   const chartData = useMemo(parseData)
 
-  useEffect(() => { getHistoricalData(props.location, timeframe)}, [timeframe, props.location])
+  useEffect(() => { getHistoricalData("today")}, [props.location])
+  useEffect(() => { getHistoricalData("yesterday")}, [props.location])
 
   return <div className="w-full h-60 mb-6 bg-slate-200 relative rounded-xl">
     <div className={"absolute top-2 left-2"}>
-      <button className={"h-6 text-slate-200 hover:bg-slate-700 rounded pl-2 pr-2 mr-2 " + (timeframe == "today" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("today")}}>Today</button>
-      <button className={"h-6 text-slate-200 hover:bg-slate-700 rounded pl-2 pr-2 mr-2 " + (timeframe == "yesterday" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("yesterday")}}>Yesterday</button>
-      {/*<button className={"h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded pl-2 pr-2 mr-2 " + (timeframe == "week" ? "bg-slate-600" : "bg-slate-500")} onClick={() => {setTimeframe("week")}}>Past Week</button>*/}
     </div>
     <button className={"w-6 h-6 text-slate-200 bg-slate-500 hover:bg-slate-600 rounded-xl absolute top-2 right-2"} onClick={props.onClose}>x</button>
     <h3 className={"text-center text-slate-900 text-3xl"}>{props.location}</h3>

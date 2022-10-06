@@ -16,6 +16,7 @@ function App(props) {
 
   return (
     <div className="App">
+    <p className="text-center text-slate-200 mb-6">Click on a location to see a graph of today's occupancy versus yesterday's for that particular location.</p>
     {activeChartLocation && <Graph location={activeChartLocation} onClose={() => {setActiveChartLocation("")}}/>}
     <LatestData data={latestData} onSelect={location => {setActiveChartLocation(location)}} />
     </div>
